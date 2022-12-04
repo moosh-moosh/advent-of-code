@@ -1,9 +1,5 @@
 # aoc
-### _Your Name <your.name@example.com>_
 
-This is a project to do ... something.
-
-## License
-
-Specify license here
+Advent of code 2022 in Common Lisp by a person who finds Lisp fun but can't use it.
+Don't expect to find anything clever here, just trying to get better at lisp.
 
