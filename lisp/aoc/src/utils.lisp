@@ -13,3 +13,18 @@
                              (append res (list (subseq seq 0 pos)))))
                  (t (split-seq nil del test (append res (list seq))))))))
     (split-seq seq delimiter test '())))
+
+(defun chunks-of (lst n)
+  (labels ((chunklist (lst n res)
+             (cond
+               ((null lst) (nreverse res))
+               ((< (length lst) n) (if res (nreverse (cons lst res)) (list lst)))
+               (t (chunklist (nthcdr n lst) n (cons (subseq lst 0 n) res))))))
+    (chunklist lst n '())))
+
+(defun str-to-set (str)
+  (loop :for ch :across str
+        :for res := (list ch) :then (if (member ch res)
+                                  res
+                                  (cons ch res))
+        :finally (return res)))
