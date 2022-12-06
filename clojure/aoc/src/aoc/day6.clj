@@ -9,13 +9,13 @@
     (when (= (count (set first-seq)) num-chars) num-chars)
     (loop [tail (vec rest-seq)
            idx (inc num-chars)
-           signal (vec first-seq)]
+           past-signal (vec first-seq)]
       (let [char (first tail)
-            signal-tail (take-last (dec num-chars) signal)]
+            last-n (take-last (dec num-chars) past-signal)]
         (cond
-          (= (count (set (conj signal-tail char))) num-chars) idx
+          (= (count (set (conj last-n char))) num-chars) idx
           (empty? tail) nil
-          :else (recur (rest tail) (inc idx) (conj signal char)))))))
+          :else (recur (rest tail) (inc idx) (conj past-signal char)))))))
 
 (defn part-one [input]
   (detect-start-of-packet-marker input 4))
