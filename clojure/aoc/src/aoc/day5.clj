@@ -61,14 +61,15 @@
         s
         (recur (rest crates) (str s (first crate)))))))
 
-(defn part-one [instructions]
-  (-> (move-crates day5-data instructions nil)
+(defn part-one [instructions crates]
+  (-> (move-crates crates instructions nil)
       (top-items)))
 
-(defn part-two [instructions]
-  (-> (move-crates day5-data instructions true)
+(defn part-two [instructions crates]
+  (-> (move-crates crates instructions true)
       (top-items)))
 
 (defn solve []
-  (let [instructions (parse-input)]
-    [(part-one instructions) (part-two instructions)]))
+  (let [instructions (parse-input)
+        crates day5-data]
+    [(part-one instructions crates) (part-two instructions crates)]))
