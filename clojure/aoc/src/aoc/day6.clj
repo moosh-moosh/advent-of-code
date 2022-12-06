@@ -1,7 +1,6 @@
 (ns aoc.day6
   (:require
-   [aoc.utils :as u]
-   [clojure.string :as string]))
+   [aoc.utils :as u]))
 
 (defn detect-start-of-packet-marker [input num-chars]
   (let [first-seq (take num-chars input)
