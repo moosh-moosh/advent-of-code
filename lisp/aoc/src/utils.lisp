@@ -28,3 +28,10 @@
                                   res
                                   (cons ch res))
         :finally (return res)))
+
+(defun range (start &optional end)
+  (let ((st (if end start 0))
+        (en (if end end start)))
+    (do ((s st (1+ s))
+         (res '() (cons s res)))
+        ((>= s en) (nreverse res)))))
