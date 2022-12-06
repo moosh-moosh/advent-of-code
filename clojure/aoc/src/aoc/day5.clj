@@ -20,10 +20,12 @@
    '("V" "B" "N" "F" "H" "T" "Q")
    '("F" "N" "Z" "H" "M" "L")])
 
+(defn str->int [str]
+  (Integer/parseInt str))
+
 (defn line->instructions [line]
-  (vec
-   (map (fn [i] (Integer/parseInt i))
-        (rest (re-matches #"^move (\d+) from (\d+) to (\d+)" line)))))
+  (let [[num from to] (map str->int (rest (re-matches #"^move (\d+) from (\d+) to (\d+)" line)))]
+    [num (dec from) (dec to)]))
 
 (defn parse-input []
   (let [input (string/split (u/read-input "day5") #"\n\n")
@@ -35,17 +37,15 @@
     instructions))
 
 (defn move [crates [num from to] crate-mover?]
-  (let [f (dec from)
-        t (dec to)
-        items (take num (nth crates f))
-        from-crate (nthrest (nth crates f) num)
-        to-crate (into (nth crates t) (if crate-mover?
-                                        (reverse items)
-                                        items))]
-    (-> (assoc crates f from-crate)
-        (assoc t to-crate))))
+  (let [items (take num (nth crates from))
+        from-crate (nthrest (nth crates from) num)
+        to-crate (into (nth crates to) (if crate-mover?
+                                         (reverse items)
+                                         items))]
+    (-> (assoc crates from from-crate)
+        (assoc to to-crate))))
 
-(defn ordered-crates [crates instructions crate-mover?]
+(defn move-crates [crates instructions crate-mover?]
   (loop [crates crates
          instructions instructions]
     (let [instruction (first instructions)]
@@ -61,15 +61,14 @@
         s
         (recur (rest crates) (str s (first crate)))))))
 
-(defn part-one []
-  (let [instructions (parse-input)]
-    (-> (ordered-crates day5-data instructions nil)
-        (top-items))))
+(defn part-one [instructions]
+  (-> (move-crates day5-data instructions nil)
+      (top-items)))
 
-(defn part-two []
-  (let [instructions (parse-input)]
-    (-> (ordered-crates day5-data instructions true)
-        (top-items))))
+(defn part-two [instructions]
+  (-> (move-crates day5-data instructions true)
+      (top-items)))
 
 (defn solve []
-  [(part-one) (part-two)])
+  (let [instructions (parse-input)]
+    [(part-one instructions) (part-two instructions)]))
