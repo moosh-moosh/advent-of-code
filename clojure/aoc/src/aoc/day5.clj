@@ -3,23 +3,6 @@
    [aoc.utils :as u]
    [clojure.string :as string]))
 
-(def day5-sample
-  ['("N" "Z")
-   '("D" "C" "M")
-   '("P")])
-
-;; Should figure out how to parse the input file properly, but not today
-(def day5-data
-  ['("M" "S" "J" "L" "V" "F" "N" "R")
-   '("H" "W" "J" "F" "Z" "D" "N" "P")
-   '("G" "D" "C" "R" "W")
-   '("S" "B" "N")
-   '("N" "F" "B" "C" "P" "W" "Z" "M")
-   '("W" "M" "R" "P")
-   '("W" "S" "L" "G" "N" "T" "R")
-   '("V" "B" "N" "F" "H" "T" "Q")
-   '("F" "N" "Z" "H" "M" "L")])
-
 (defn str->int [str]
   (Integer/parseInt str))
 
@@ -27,49 +10,79 @@
   (let [[num from to] (map str->int (rest (re-matches #"^move (\d+) from (\d+) to (\d+)" line)))]
     [num (dec from) (dec to)]))
 
+(defn line->crates [line]
+  (->> line (rest) (take-nth 4)))
+
+(defn do-move [num from to & {:keys [crate-mover?] :or {crate-mover? false}}]
+  (if crate-mover?
+    (cond
+      (empty? from) [from to]
+      (>= num (count from)) [[] (into to from)]
+      :else [(subvec from 0 (- (count from) num))
+             (into to (take-last num from))])
+    (loop [i 0
+           from from
+           to to]
+      (if (or (>= i num) (empty? from))
+        [from to]
+        (recur (inc i) (pop from) (conj to (last from)))))))
+
+(defn move [stacks [num from to] & {:keys [crate-mover?] :or {crate-mover? false}}]
+  (let [from-stack (stacks from)
+        to-stack (stacks to)
+        [new-from new-to] (do-move num from-stack to-stack :crate-mover? crate-mover?)]
+    (-> (assoc stacks from new-from)
+        (assoc to new-to))))
+
+(defn move-stacks [stacks instructions & {:keys [crate-mover?] :or {crate-mover? false}}]
+  (reduce (fn [s i] (move s i :crate-mover? crate-mover?)) stacks instructions))
+
+(defn build-stacks [n]
+  (loop [i 0
+         v []]
+    (if (>= i n)
+      v
+      (recur (inc i) (conj v [])))))
+
+(defn parse-stacks [input]
+  (let [num-stacks (last (re-find #"\n\s\d+.*" input))]
+    (build-stacks (Character/digit num-stacks 10))))
+
+(defn crates-to-stacks [crates stacks]
+  (loop [crates crates
+         stacks stacks
+         i 0]
+    (let [crate (first crates)]
+      (cond
+        (empty? crates) stacks
+        (= crate \space) (recur (rest crates) stacks (inc i))
+        :else (recur (rest crates) (assoc stacks i (conj (stacks i) crate)) (inc i))))))
+
 (defn parse-input []
   (let [input (string/split (u/read-input "day5") #"\n\n")
-        raw-instructions (string/split-lines (second input))
+        stacks (parse-stacks (first input))
+        crates (map line->crates (string/split-lines (string/replace (first input) #"\n\s\d+.*" "")))
         instructions (reduce (fn [coll line]
                                (conj coll (line->instructions line)))
                              []
-                             raw-instructions)]
-    instructions))
+                             (string/split-lines (second input)))]
+    [(reduce (fn [s c]
+              (vec (crates-to-stacks c s)))
+            stacks
+            (reverse crates))
+     instructions]))
 
-(defn move [crates [num from to] crate-mover?]
-  (let [items (take num (nth crates from))
-        from-crate (nthrest (nth crates from) num)
-        to-crate (into (nth crates to) (if crate-mover?
-                                         (reverse items)
-                                         items))]
-    (-> (assoc crates from from-crate)
-        (assoc to to-crate))))
-
-(defn move-crates [crates instructions crate-mover?]
-  (loop [crates crates
-         instructions instructions]
-    (let [instruction (first instructions)]
-      (if (empty? instructions)
-        crates
-        (recur (move crates instruction crate-mover?) (rest instructions))))))
-
-(defn top-items [crates]
-  (loop [crates crates
-         s ""]
-    (let [crate (first crates)]
-      (if (empty? crates)
-        s
-        (recur (rest crates) (str s (first crate)))))))
+(defn top-items [stacks]
+  (reduce (fn [v c] (str v (last c))) "" stacks))
 
 (defn part-one [instructions crates]
-  (-> (move-crates crates instructions nil)
+  (-> (move-stacks crates instructions)
       (top-items)))
 
 (defn part-two [instructions crates]
-  (-> (move-crates crates instructions true)
+  (-> (move-stacks crates instructions :crate-mover? true)
       (top-items)))
 
 (defn solve []
-  (let [instructions (parse-input)
-        crates day5-data]
-    [(part-one instructions crates) (part-two instructions crates)]))
+  (let [[stacks instructions] (parse-input)]
+    [(part-one instructions stacks) (part-two instructions stacks)]))
