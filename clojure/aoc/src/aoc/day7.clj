@@ -57,7 +57,6 @@
     @total))
 
 (defn size-of-dir-to-delete [fs min-size]
-  (println min-size)
   (let [sizes (atom [])]
     (clojure.walk/postwalk (fn [n]
                              (when (and (map-entry? n)
