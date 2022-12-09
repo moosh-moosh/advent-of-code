@@ -5,6 +5,8 @@
    [clojure.string :as string]))
 
 (def limit 100000)
+(def total-disk 70000000)
+(def min-free-space 30000000)
 
 (defn push-path [path loc]
   (conj path loc))
@@ -21,6 +23,13 @@
 
 (defn make-file [name size]
   {name (Long/parseLong size)})
+
+(defn get-used-size [fs]
+  (or (get-in fs ["/" :total]) 0))
+
+(defn get-min-deleted [fs]
+  (->> (- total-disk (get-used-size fs))
+       (- min-free-space)))
 
 (defn add-dir [[path fs] dir]
   (let [d (make-dir dir)]
@@ -46,6 +55,18 @@
                              n)
                            fs)
     @total))
+
+(defn size-of-dir-to-delete [fs min-size]
+  (println min-size)
+  (let [sizes (atom [])]
+    (clojure.walk/postwalk (fn [n]
+                             (when (and (map-entry? n)
+                                        (= :total (first n))
+                                        (>= (second n) min-size))
+                               (swap! sizes conj (second n)))
+                             n)
+                           fs)
+    (reduce min @sizes)))
 
 (defn add-file [[path fs] file]
   (if (nil? file)
@@ -104,6 +125,11 @@
 (defn part-one [fs]
   (sum-below-limit fs limit))
 
+(defn part-two [fs]
+  (let [min-deleted (get-min-deleted fs)]
+    (size-of-dir-to-delete fs min-deleted)))
+
 (defn solve []
-  (let [input (u/read-input "day7" :sample? false)]
-    (part-one (parse-input input))))
+  (let [input (u/read-input "day7" :sample? false)
+        fs (parse-input input)]
+    [(part-one fs) (part-two (second fs))]))
