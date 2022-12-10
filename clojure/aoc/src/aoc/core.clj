@@ -6,7 +6,8 @@
    [aoc.day4 :as day4]
    [aoc.day5 :as day5]
    [aoc.day6 :as day6]
-   [aoc.day7 :as day7])
+   [aoc.day7 :as day7]
+   [aoc.day8 :as day8])
   (:gen-class))
 
 (defn -main
@@ -21,4 +22,5 @@
       "5" (println (day5/solve))
       "6" (println (day6/solve))
       "7" (println (day7/solve))
+      "8" (println (day8/solve))
       (println (str "no solution for day " day)))))
