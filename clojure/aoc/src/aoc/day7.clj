@@ -12,6 +12,7 @@
   (conj path loc))
 
 (defn pop-path [path]
+  "Pop a location from the path, make sure root location always remains."
   (if (= (count path) 1)
     path
     (pop path)))
@@ -32,6 +33,7 @@
        (- min-free-space)))
 
 (defn add-dir [[path fs] dir]
+  "Add new directory to FS. Update new location to PATH."
   (let [d (make-dir dir)]
     (if (nil? d)
       [path fs]
@@ -46,8 +48,9 @@
            size)))
 
 (defn sum-below-limit [fs limit]
+  "Walk over FS adding together totals less than or equal to LIMIT."
   (let [total (atom 0)]
-    (clojure.walk/postwalk (fn [n]
+    (walk/postwalk (fn [n]
                              (when (and (map-entry? n)
                                         (= :total (first n))
                                         (<= (second n) limit))
@@ -57,8 +60,9 @@
     @total))
 
 (defn size-of-dir-to-delete [fs min-size]
+  "Walk over FS, add all totals greater than or equal to MIN-SIZE to a vector, return the smallest value."
   (let [sizes (atom [])]
-    (clojure.walk/postwalk (fn [n]
+    (walk/postwalk (fn [n]
                              (when (and (map-entry? n)
                                         (= :total (first n))
                                         (>= (second n) min-size))
@@ -68,6 +72,7 @@
     (reduce min @sizes)))
 
 (defn add-file [[path fs] file]
+  "Adds FILE to FS at current location in PATH."
   (if (nil? file)
     [path fs]
     [path
