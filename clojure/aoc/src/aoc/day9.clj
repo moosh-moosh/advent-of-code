@@ -3,6 +3,9 @@
    [clojure.string :as string]
    [aoc.utils :as u]))
 
+(defn make-rope [len]
+  (vec (repeat len [0 0])))
+
 (defn distance [[x1 y1] [x2 y2]]
   (int
    (Math/sqrt (+ (int (Math/pow (- x2 x1) 2))
@@ -80,22 +83,20 @@
       (col-aligned? head tail) (move-vertical head tail)
       :else (move-diagonal head tail))))
 
-(defn add-if-new [locs loc]
-  (if (some #(= % loc) locs)
-    locs
-    (conj locs loc)))
-
-(defn apply-move [move [head tail locs]]
+(defn move-rope [[head & tail] move]
   (let [new-head (move head)
-        tail-move (get-move new-head tail)]
-    (if tail-move
-      [new-head (tail-move tail) (add-if-new locs (tail-move tail))]
-      [new-head tail locs])))
+        [new-rope _] (reduce (fn [[rope front] knot]
+                               (let [m (get-move front knot)]
+                                 (if m [(conj rope (m knot)) (m knot)] [(conj rope knot) knot])))
+                             [[new-head] new-head]
+                             tail)]
+    new-rope))
 
-(defn apply-moves [[head tail locs] moves]
-  (reduce (fn [data move]
-            (apply-move move data))
-          [head tail locs]
+(defn apply-moves [rope tail-locs moves]
+  (reduce (fn [[r tail-locs] move]
+            (let [new-rope (move-rope r move)]
+              [new-rope (conj tail-locs (last new-rope))]))
+          [rope tail-locs]
           moves))
 
 (defn get-count [count-str]
@@ -121,11 +122,21 @@
   (let [lines (string/split-lines input)]
     (lines->moves lines)))
 
-(defn part-one [input]
-  (let [moves (parse-input input)
-        [_ _ locs] (reduce apply-moves [[0 0] [0 0] [[0 0]]] moves)]
-    (count locs)))
+(defn part-one [moves]
+  (let [[_ tail-locs] (reduce (fn [[rope tail-locs] moves]
+                                (apply-moves rope tail-locs moves))
+                              [(make-rope 2) #{[0 0]}]
+                              moves)]
+    (count tail-locs)))
+
+(defn part-two [moves]
+  (let [[_ tail-locs] (reduce (fn [[rope tail-locs] moves]
+                                (apply-moves rope tail-locs moves))
+                              [(make-rope 10) #{[0 0]}]
+                              moves)]
+    (count tail-locs)))
 
 (defn solve []
-  (let [input (u/read-input "day9" :sample? false)]
-    [(part-one input)]))
+  (let [input (u/read-input "day9" :sample? false)
+        moves (parse-input input)]
+    [(part-one moves) (part-two moves)]))
