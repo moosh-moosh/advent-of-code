@@ -28,6 +28,14 @@
   [(first (find-coords \S grid))
    (first (find-coords \E grid))])
 
+;; this function is O(1) for my life
+(defn find-low-points [grid]
+  (let [low-point (int \a)]
+    (for [[x r] (map-indexed vector grid)
+          [y v] (map-indexed vector r)
+          :when (= v low-point)]
+      [x y])))
+
 (defn grid-to-values [grid]
   (mapv #(mapv ch->int %) grid))
 
@@ -51,7 +59,7 @@
     (loop [routes routes
            queue queue]
       (if (empty? queue)
-        routes
+        nil
         (let [[steps pos] (peek queue)]
           (cond
             (= pos dst) steps
@@ -67,6 +75,16 @@
         [start end] (find-start-end char-grid)]
     {:start start :end end :grid (grid-to-values char-grid)}))
 
+(defn part-one [{:keys [start end grid]}]
+  (bfs start end grid))
+
+(defn part-two [{:keys [end grid]}]
+  (let [starting-points (find-low-points grid)]
+    (->> starting-points
+         (map #(bfs % end grid))
+         (filter #(not (nil? %)))
+         (reduce min))))
+
 (defn solve []
   (let [data (parse-input (u/read-input "day12" :sample? false))]
-    (bfs (:start data) (:end data) (:grid data))))
+    (part-two data)))
