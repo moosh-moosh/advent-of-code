@@ -35,3 +35,17 @@
     (do ((s st (1+ s))
          (res '() (cons s res)))
         ((>= s en) (nreverse res)))))
+
+(defun every-nth (str n)
+  (loop :for x :across str
+        :for y :in (range (length str))
+        :when (= (mod y n) 0)
+          :collect x))
+
+(defun transpose (grid)
+  (apply 'mapcar 'list grid))
+
+(defun take (n lst)
+  (if (> n (length lst))
+      lst
+      (subseq lst 0 n)))

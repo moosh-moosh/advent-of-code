@@ -8,4 +8,11 @@
   :serial t
   :pathname "src"
   :components ((:file "package")
-               (:file "aoc")))
+               (:file "aoc")
+               (:file "utils")
+               (:file "day1")
+               (:file "day2")
+               (:file "day3")
+               (:file "day4")
+               (:file "day5"))
+  :depends-on (:cl-ppcre))
