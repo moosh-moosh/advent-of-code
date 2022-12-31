@@ -1,57 +1,104 @@
 (in-package #:aoc)
 
+(defstruct (point (:conc-name pt-)) x y)
+(defstruct (ftree (:conc-name tree-))
+  value
+  point)
+
+;; ugly and unnecessary really! just my style
+(defun create-forest (input)
+  (let ((row -1))
+    (mapcar #'(lambda (r)
+                (incf row)
+                (let ((col -1))
+                  (mapcar #'(lambda (c)
+                              (incf col)
+                              (make-ftree :value (parse-integer c)
+                                          :point (make-point :x col :y row)))
+                          (cl-ppcre:split "" r))))
+            input)))
+
 (defun d8-parse ()
   (let* ((input (read-input "day8" :lines? t))
-         (lst (mapcar #'(lambda (row)
-                          (mapcar #'parse-integer (cl-ppcre:split "" row)))
-                      input))
-         (vec (make-array (list (length lst) (length (first lst))) :initial-contents lst)))
-    vec))
+         (lst (create-forest input))
+         (forest (make-array (list (length lst) (length (first lst))) :initial-contents lst)))
+    forest))
 
-(defun row-hidden? (x y width forest)
-  (let ((tree (aref forest y x))
-        (hidden nil))
-    (loop :for i :from (1+ x) :below width
-          :when (>= (aref forest y i) tree)
-            :do (loop :for j :from (1- x) :downto 0
-                      :when (>= (aref forest y j) tree)
-                        :do (setf hidden t)))
-    hidden))
 
-(defun col-hidden? (x y height forest)
-  (let ((tree (aref forest y x))
-        (hidden nil))
-    (loop :for i :from (1+ y) :below height
-          :when (>= (aref forest i x) tree)
-            :do (loop :for j :from (1- y) :downto 0
-                      :when (>= (aref forest j x) tree)
-                        :do (setf hidden t)))
-    hidden))
+(defun scan-left (point array)
+  (loop :for i :from (1- (pt-x point)) :downto 0
+        :collecting (aref array (pt-y point) i)))
 
-(defun tree-hidden? (x y forest)
-  (destructuring-bind (height width) (array-dimensions forest)
-    (when (and (> x 0) (< x width)
-               (> y 0) (< y height))
-      (and (row-hidden? x y width forest)
-           (col-hidden? x y height forest)))))
+(defun scan-right (point array)
+  (let ((cols (array-dimension array 1)))
+    (loop :for i :from (1+ (pt-x point)) :below cols
+          :collecting (aref array (pt-y point) i))))
 
-(defun get-row (array col)
+(defun scan-up (point array)
+  (loop :for i :from (1- (pt-y point)) :downto 0
+        :collecting (aref array i (pt-x point))))
+
+(defun scan-down (point array)
   (let ((rows (array-dimension array 0)))
-    (loop :for i :from 0 :below rows
-          :collecting (aref array i col))))
+    (loop :for i :from (1+ (pt-y point)) :below rows
+          :collecting (aref array i (pt-x point)))))
+
+(defun remove-shorter-trees (tree trees)
+  (remove-if #'(lambda (tr)
+                 (< (tree-value tr) (tree-value tree)))
+             trees))
+
+(defun tree-visible-p (tree forest)
+  (or (null (remove-shorter-trees tree (scan-left (tree-point tree) forest)))
+      (null (remove-shorter-trees tree (scan-right (tree-point tree) forest)))
+      (null (remove-shorter-trees tree (scan-up (tree-point tree) forest)))
+      (null (remove-shorter-trees tree (scan-down (tree-point tree) forest)))))
+
+(defun num-edge-trees (forest)
+  (let ((rows (array-dimension forest 0))
+        (cols (array-dimension forest 1)))
+    (+ (* 2 cols) (* 2 (- rows 2)))))
+
+(defun viewing-distance (tree trees)
+  (loop :for i :in trees
+        :with n := 0 :do
+        (cond
+          ((= (tree-value i) (tree-value tree)) (return (incf n)))
+          ((< (tree-value i) (tree-value tree)) (incf n))
+          (t (return (incf n))))
+        :finally (return n)))
+
+(defun scenic-score (tree forest)
+  (* (viewing-distance tree (scan-up (tree-point tree) forest))
+     (viewing-distance tree (scan-right (tree-point tree) forest))
+     (viewing-distance tree (scan-down (tree-point tree) forest))
+     (viewing-distance tree (scan-left (tree-point tree) forest))))
+
+(defun visible-trees (forest)
+  (let ((rows (array-dimension forest 0))
+        (cols (array-dimension forest 1)))
+    (loop :for i :from 1 :below (1- rows) nconc
+            (loop :for j :from 1 :below (1- cols)
+                  :when (tree-visible-p (aref forest i j) forest)
+                    :collect (aref forest i j)))))
 
 (defun d8-part-one (forest)
-  (let ((visible-trees nil))
-  (destructuring-bind (height width) (array-dimensions forest)
-    (loop :for i :from 0 :below height :do
-          (loop :for j :from 0 :below width
-                :when (not (tree-hidden? j i forest))
-                  :do (setf visible-trees (cons (aref forest i j) visible-trees))))
-    (length visible-trees))))
+  (let ((edges (num-edge-trees forest))
+        (visible-trees (visible-trees forest)))
+    (+ (length visible-trees) edges)))
 
-(defun d8-part-two () nil)
+(defun d8-part-two (forest)
+  (destructuring-bind (rows cols) (array-dimensions forest)
+    (loop :for i :from 0 :below (* rows cols)
+          :with h := 0
+          :do
+             (let ((score (scenic-score (row-major-aref forest i) forest)))
+               (when (> score h)
+                 (setf h score)))
+          :finally (return h))))
+
 (defun d8-solve ()
   (let ((forest (d8-parse)))
     (values
      (d8-part-one forest)
-     nil)))
+     (d8-part-two forest))))
