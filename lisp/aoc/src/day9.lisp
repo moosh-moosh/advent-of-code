@@ -109,7 +109,8 @@
       ((null mv) nil)
       (t
        (let ((new-pt (funcall mv (first rtail))))
-         (setf *tail-locs* (cons (format nil "(~A,~A)" (pt-x new-pt) (pt-y new-pt)) *tail-locs*))
+         (when (= (length rtail) 1)
+           (setf *tail-locs* (cons (format nil "(~A,~A)" (pt-x new-pt) (pt-y new-pt)) *tail-locs*)))
          (move-tail new-pt (rest rtail)))))))
 
 (defun handle-moves (mv count rope)
@@ -124,8 +125,15 @@
           (loop :for mv :in m :do (move-rope rope mv)))
     (count-tail-locs *tail-locs*)))
 
+(defun d9-part-two (moves)
+  (setf *tail-locs* '("(START)"))
+  (let ((rope (make-rope 10)))
+    (loop :for m :in moves :do
+      (loop :for mv :in m :do (move-rope rope mv)))
+    (count-tail-locs *tail-locs*)))
+
 (defun d9-solve ()
   (let ((moves (d9-parse)))
     (values
      (d9-part-one moves)
-     nil)))
+     (d9-part-two moves))))
