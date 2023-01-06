@@ -1,4 +1,16 @@
 ;;;; package.lisp
 
 (defpackage #:aoc
-  (:use #:cl))
+  (:use #:cl)
+  (:export :read-input
+           :add-solution
+           :split-sequence
+           :chunks-of
+           :str-to-set
+           :range
+           :every-nth
+           :transpose
+           :take
+           :make-point
+           :pt-x
+           :pt-y))

@@ -1,4 +1,7 @@
-(in-package #:aoc)
+(defpackage #:aoc/2022/day3
+  (:use #:cl #:aoc)
+  (:export :solve))
+(in-package #:aoc/2022/day3)
 
 (defun char-priority (char)
   (let ((ch (char-int char)))
@@ -43,7 +46,9 @@
             (mapcar #'find-common-in-all chunked-rucksacks)
             :initial-value 0)))
 
-(defun day3-solve ()
+(defun solve ()
   (let ((input (read-input "day3" :lines? t)))
     (values (part-one input)
             (part-two input))))
+
+(add-solution '202203 #'solve)

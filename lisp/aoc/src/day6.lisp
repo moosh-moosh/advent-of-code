@@ -1,6 +1,9 @@
-(in-package #:aoc)
+(defpackage #:aoc/2022/day6
+  (:use #:cl #:aoc)
+  (:export :solve))
+(in-package #:aoc/2022/day6)
 
-(defun d6-parse ()
+(defun parse ()
   (let ((input (read-input "day6")))
     input))
 
@@ -16,14 +19,16 @@
 (defun unique? (str)
   (string= str (remove-duplicates str)))
 
-(defun d6-part-one (input)
+(defun part-one (input)
   (find-start-of-packet input 4))
 
-(defun d6-part-two (input)
+(defun part-two (input)
   (find-start-of-packet input 14))
 
-(defun d6-solve ()
-  (let ((input (d6-parse)))
+(defun solve ()
+  (let ((input (parse)))
     (values
-     (d6-part-one input)
-     (d6-part-two input))))
+     (part-one input)
+     (part-two input))))
+
+(add-solution '202206 #'solve)

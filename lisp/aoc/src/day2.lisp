@@ -1,4 +1,7 @@
-(in-package #:aoc)
+(defpackage #:aoc/2022/day2
+  (:use #:cl #:aoc)
+  (:export :solve))
+(in-package #:aoc/2022/day2)
 
 (defparameter *shape-scores*
   '(("A X" . 4) ("A Y" . 8) ("A Z" . 3)
@@ -16,7 +19,9 @@
 (defun outcome->score (outcome)
   (cdr (assoc outcome *outcome-scores* :test #'string=)))
 
-(defun day2-solve ()
+(defun solve ()
   (let ((input (read-input "day2" :lines? t)))
     (values (reduce #'+ (mapcar #'shapes->score input))
             (reduce #'+ (mapcar #'outcome->score input)))))
+
+(add-solution '202202 #'solve)

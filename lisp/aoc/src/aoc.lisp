@@ -2,8 +2,12 @@
 
 (in-package #:aoc)
 
-(defun read-input (day &key (lines? nil))
-  (let ((path (format nil "../../../inputs/~a.txt" day)))
-    (if lines?
-        (uiop:read-file-lines path)
-        (uiop:read-file-string path))))
+(defparameter *solutions* (make-hash-table))
+
+(defun add-solution (name fn)
+  (setf (gethash name *solutions*) fn))
+
+(defun solve (name)
+  (if (gethash name *solutions*)
+      (funcall (gethash name *solutions*))
+      (format t "~&No solution found for ~a" name)))

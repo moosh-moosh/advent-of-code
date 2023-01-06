@@ -1,4 +1,7 @@
-(in-package #:aoc)
+(defpackage #:aoc/2022/day7
+  (:use #:cl #:aoc)
+  (:export :solve))
+(in-package #:aoc/2022/day7)
 
 (defparameter *total-size* 70000000)
 (defparameter *required-size* 30000000)
@@ -7,7 +10,7 @@
 (defstruct dir name (files nil) (size 0))
 (defstruct file name size)
 
-(defun d7-parse ()
+(defun parse ()
   (let ((input (read-input "day7" :lines? t)))
     input))
 
@@ -110,16 +113,18 @@
           :do (setf s (dir-size v))
         :finally (return s)))
 
-(defun d7-part-one (input)
+(defun part-one (input)
   (mapcar #'parse-line input)
   (sum-totals *fs* 100000))
 
-(defun d7-part-two (fs)
+(defun part-two (fs)
   (let ((min (min-to-free fs)))
     (find-smallest-delete fs min)))
 
-(defun d7-solve ()
-  (let ((input (d7-parse)))
+(defun solve ()
+  (let ((input (parse)))
     (values
-     (d7-part-one input)
-     (d7-part-two *fs*))))
+     (part-one input)
+     (part-two *fs*))))
+
+(add-solution '202207 #'solve)

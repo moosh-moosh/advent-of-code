@@ -1,6 +1,8 @@
-(in-package #:aoc)
+(defpackage #:aoc/2022/day8
+  (:use #:cl #:aoc)
+  (:export :solve))
+(in-package #:aoc/2022/day8)
 
-(defstruct (point (:conc-name pt-)) x y)
 (defstruct (ftree (:conc-name tree-))
   value
   point)
@@ -18,7 +20,7 @@
                           (cl-ppcre:split "" r))))
             input)))
 
-(defun d8-parse ()
+(defun parse ()
   (let* ((input (read-input "day8" :lines? t))
          (lst (create-forest input))
          (forest (make-array (list (length lst) (length (first lst))) :initial-contents lst)))
@@ -82,12 +84,12 @@
                   :when (tree-visible-p (aref forest i j) forest)
                     :collect (aref forest i j)))))
 
-(defun d8-part-one (forest)
+(defun part-one (forest)
   (let ((edges (num-edge-trees forest))
         (visible-trees (visible-trees forest)))
     (+ (length visible-trees) edges)))
 
-(defun d8-part-two (forest)
+(defun part-two (forest)
   (destructuring-bind (rows cols) (array-dimensions forest)
     (loop :for i :from 0 :below (* rows cols)
           :with h := 0
@@ -97,8 +99,10 @@
                  (setf h score)))
           :finally (return h))))
 
-(defun d8-solve ()
-  (let ((forest (d8-parse)))
+(defun solve ()
+  (let ((forest (parse)))
     (values
-     (d8-part-one forest)
-     (d8-part-two forest))))
+     (part-one forest)
+     (part-two forest))))
+
+(add-solution '202208 #'solve)

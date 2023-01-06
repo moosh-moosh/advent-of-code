@@ -1,5 +1,14 @@
 (in-package #:aoc)
 
+(defstruct (point (:conc-name pt-)) x y)
+
+(defun read-input (day &key (lines? nil))
+  (let ((path (format nil "../../inputs/~a.txt" day)))
+    (if lines?
+        (uiop:read-file-lines path)
+        (uiop:read-file-string path))))
+
+
 (defun split-sequence (seq delimiter &key (test #'eq))
   "Split sequence SEQ by DELIMITER."
   (labels ((split-seq (seq del test res)

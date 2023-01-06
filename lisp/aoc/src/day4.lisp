@@ -1,4 +1,7 @@
-(in-package #:aoc)
+(defpackage #:aoc/2022/day4
+  (:use #:cl #:aoc)
+  (:export :solve))
+(in-package #:aoc/2022/day4)
 
 (defun line-to-pair (line)
   (let ((pair (uiop:split-string line :separator '(#\,))))
@@ -8,7 +11,7 @@
                          (1+ (parse-integer (cadr r))))))
             pair)))
 
-(defun day4-p1 (pairs)
+(defun part-one (pairs)
   (reduce #'(lambda (val pair)
               (if (or (subsetp (car pair) (cadr pair))
                       (subsetp (cadr pair) (car pair)))
@@ -17,7 +20,7 @@
           pairs
           :initial-value 0))
 
-(defun day4-p2 (pairs)
+(defun part-two (pairs)
   (reduce #'(lambda (val pair)
               (if (intersection (car pair) (cadr pair))
                   (1+ val)
@@ -25,7 +28,9 @@
           pairs
           :initial-value 0))
 
-(defun day4-solve ()
+(defun solve ()
   (let* ((input (read-input "day4" :lines? t))
          (pairs (mapcar #'line-to-pair input)))
-    (values (day4-p1 pairs) (day4-p2 pairs))))
+    (values (part-one pairs) (part-two pairs))))
+
+(add-solution '202204 #'solve)

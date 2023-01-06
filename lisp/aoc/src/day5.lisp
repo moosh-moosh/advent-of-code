@@ -1,13 +1,16 @@
-(in-package #:aoc)
+(defpackage #:aoc/2022/day5
+  (:use #:cl #:aoc)
+  (:export :solve))
+(in-package #:aoc/2022/day5)
 
-(defun d5-parse ()
+(defun parse ()
   (let* ((data (read-input "day5" :lines? nil))
          (stacks-moves (cl-ppcre:split "\\n\\n" data))
-         (stack-count (d5-parse-stack-count (first stacks-moves)))
+         (stack-count (parse-stack-count (first stacks-moves)))
          (stacks (mapcar #'(lambda (ln)
-                             (fill-list (d5-parse-crate ln) stack-count))
+                             (fill-list (parse-crate ln) stack-count))
                          (cl-ppcre:split "\\n" (remove-stack-count (first stacks-moves)))))
-         (instructions (mapcar #'d5-parse-instruction (cl-ppcre:split "\\n" (second stacks-moves)))))
+         (instructions (mapcar #'parse-instruction (cl-ppcre:split "\\n" (second stacks-moves)))))
     (list (mapcar #'remove-empty (transpose stacks))
           instructions)))
 
@@ -19,17 +22,17 @@
 (defun remove-stack-count (stacks)
   (cl-ppcre:regex-replace "\\n.+\\d+" stacks ""))
 
-(defun d5-parse-stack-count (stacks)
+(defun parse-stack-count (stacks)
   (let* ((pos (cl-ppcre:scan "\\n.+\\d+" stacks))
          (count-ln (subseq stacks (1+ pos))))
     (cl-ppcre:register-groups-bind ((#'parse-integer n))
         ("^.+(\\d+)$" count-ln)
       n)))
 
-(defun d5-parse-crate (ln)
+(defun parse-crate (ln)
   (every-nth (subseq ln 1) 4))
 
-(defun d5-parse-instruction (inst)
+(defun parse-instruction (inst)
   (cl-ppcre:register-groups-bind ((#'parse-integer num from to))
       ("move\\s(\\d+)\\sfrom\\s(\\d+)\\sto\\s(\\d+)" inst)
     (list num from to)))
@@ -49,36 +52,36 @@
           stacks
           :initial-value '()))
 
-(defun d5-part-one (data)
+(defun part-one (data)
   (let ((final-stacks (reduce #'(lambda (stacks inst)
-                                  (d5-moves stacks inst))
+                                  (moves stacks inst))
                               (second data)
                               :initial-value (first data))))
     (concatenate 'string (nreverse (top-crates final-stacks)))))
 
-(defun d5-part-two (data)
+(defun part-two (data)
   (let ((final-stacks (reduce #'(lambda (stacks inst)
-                                  (d5-moves stacks inst t))
+                                  (moves stacks inst t))
                               (second data)
                               :initial-value (first data))))
     (concatenate 'string (nreverse (top-crates final-stacks)))))
 
-(defun d5-moves (stacks instruction &optional (crate-mover? nil))
+(defun moves (stacks instruction &optional (crate-mover? nil))
   (let ((num  (first instruction))
         (from (second instruction))
         (to   (third instruction)))
     (if crate-mover?
-        (d5-move-multiple stacks num from to)
+        (move-multiple stacks num from to)
         (progn
-          (dotimes (n num) (d5-move stacks from to))
+          (dotimes (n num) (move stacks from to))
           stacks))))
 
-(defun d5-move (stacks from to)
+(defun move (stacks from to)
   (let ((crate (pop (nth (1- from) stacks))))
     (push crate (nth (1- to) stacks))
     stacks))
 
-(defun d5-move-multiple (stacks n from to)
+(defun move-multiple (stacks n from to)
   (let* ((crates   (take n (nth (1- from) stacks)))
          (new-from (nthcdr n (nth (1- from) stacks)))
          (new-to   (append crates (nth (1- to) stacks))))
@@ -86,7 +89,9 @@
     (setf (nth (1- to) stacks) new-to)
     stacks))
 
-(defun d5-solve ()
+(defun solve ()
   (values
-   (d5-part-one (d5-parse))
-   (d5-part-two (d5-parse))))
+   (part-one (parse))
+   (part-two (parse))))
+
+(add-solution '202205 #'solve)
