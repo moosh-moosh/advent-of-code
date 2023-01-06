@@ -3,7 +3,7 @@
 (asdf:defsystem #:aoc
   :description "Trying my best to work through Advent of Code 2022 in Common Lisp"
   :author "Ossi Pettersson <ossi@moosh.dev>"
-  :license  ""
+  :license  "MIT"
   :version "0.0.1"
   :serial t
   :pathname "src"
@@ -18,5 +18,6 @@
                (:file "day6")
                (:file "day7")
                (:file "day8")
-               (:file "day9"))
+               (:file "day9")
+               (:file "day10"))
   :depends-on (:cl-ppcre))
