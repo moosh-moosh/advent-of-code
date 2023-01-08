@@ -13,4 +13,9 @@
            :take
            :make-point
            :pt-x
-           :pt-y))
+           :pt-y
+           :make-queue
+           :dequeue
+           :enqueue
+           :peek
+           :empty-queue?))

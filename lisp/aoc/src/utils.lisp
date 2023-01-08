@@ -59,3 +59,37 @@
   (if (> n (length lst))
       lst
       (subseq lst 0 n)))
+
+(defclass queue ()
+  ((list :initform nil)
+   (tail :initform nil)))
+
+(defmethod print-object ((queue queue) stream)
+  (print-unreadable-object (queue stream :type t)
+    (with-slots (list tail) queue
+      (cond ((cddddr list)
+             (format stream "(~{~S ~}... ~S)" (subseq list 0 3) (first tail)))
+            (t (format stream "~:S" list))))))
+
+(defmethod dequeue ((queue queue))
+  (with-slots (list) queue
+    (pop list)))
+
+(defmethod enqueue (new-item (queue queue))
+  (with-slots (list tail) queue
+    (let ((new-tail (list new-item)))
+      (cond ((null list) (setf list new-tail))
+            (t (setf (cdr tail) new-tail)))
+      (setf tail new-tail)))
+  queue)
+
+(defmethod peek ((queue queue))
+  (with-slots (list) queue
+    (first list)))
+
+(defmethod empty-queue? ((queue queue))
+  (with-slots (list) queue
+    (null list)))
+
+(defun make-queue ()
+  (make-instance 'queue))
