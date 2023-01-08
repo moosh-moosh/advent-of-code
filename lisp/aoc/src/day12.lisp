@@ -89,7 +89,7 @@
                   (when (some #'(lambda (h) (equalp h pos)) goals)
                     (return (gethash (hill-key pos) visited)))
                   (dolist (hill (neighbours pos arr test))
-                    (unless (or (gethash (hill-key hill) visited))
+                    (unless (gethash (hill-key hill) visited)
                       (enqueue hill queue)
                       (setf (gethash (hill-key hill) visited)
                             (1+ (gethash (hill-key pos) visited))))))))))
