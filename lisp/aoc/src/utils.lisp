@@ -93,3 +93,11 @@
 
 (defun make-queue ()
   (make-instance 'queue))
+
+(defun partition (lst n &key (step n))
+  (assert (and (> n 0) (> step 0)))
+  (labels ((part-iter (lst n res &key (step n))
+             (cond ((null lst) (nreverse res))
+                   ((< (length lst) n) (nreverse res))
+                   (t (part-iter (nthcdr step lst) n (cons (subseq lst 0 n) res) :step step)))))
+    (part-iter lst n '() :step step)))

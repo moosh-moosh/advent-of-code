@@ -46,21 +46,20 @@
     ((> left right) 'left)
     (t nil)))
 
-(defun parse ()
-  (let ((input (read-input "day13" :lines? nil)))
-    (mapcar #'read-from-string
-            (remove-if #'empty-str-p
-                       (cl-ppcre:split "\\n" (make-lispy input))))))
-
 (defun compare-pairs (pairs)
   (loop :for pair :in pairs
         :for i :from 1
         :when (eql 'right (compare-pair (first pair) (second pair)))
           :collect i))
 
+(defun parse ()
+  (let ((input (read-input "day13" :lines? nil)))
+    (mapcar #'read-from-string
+            (remove-if #'empty-str-p
+                       (cl-ppcre:split "\\n" (make-lispy input))))))
+
 (defun part-one (input)
-  (let ((pairs (chunks-of input 2)))
-    (reduce #'+ (compare-pairs pairs))))
+  (reduce #'+ (compare-pairs (chunks-of input 2))))
 
 (defun part-two (input)
   (let ((sorted-packets (sort (append '(((2)) ((6))) input) #'(lambda (a b) (eql (compare-pair a b) 'right)))))

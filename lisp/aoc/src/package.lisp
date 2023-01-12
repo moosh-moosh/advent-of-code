@@ -18,4 +18,5 @@
            :dequeue
            :enqueue
            :peek
-           :empty-queue?))
+           :empty-queue?
+           :partition))
